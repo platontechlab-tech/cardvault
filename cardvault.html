@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b1110" />
+  <meta name="description" content="CardVault — οργάνωσε την ποδοσφαιρική συλλογή καρτών σου." />
+  <title>CardVault — Football Card Collection</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+    :root {
+      --bg: #0b1110;
+      --panel: #111a18;
+      --panel-2: #16211e;
+      --panel-3: #1b2925;
+      --line: rgba(220, 240, 230, .09);
+      --text: #eff6f1;
+      --muted: #91a39a;
+      --green: #b7f36b;
+      --green-dark: #8edb42;
+      --gold: #f4c96b;
+      --red: #ff7777;
+      --radius: 18px;
+      --shadow: 0 22px 70px rgba(0,0,0,.28);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--text); background:
+        radial-gradient(ellipse at 84% 0%, rgba(113, 173, 79, .11), transparent 31%),
+        radial-gradient(ellipse at 0% 65%, rgba(61, 116, 91, .08), transparent 28%), var(--bg);
+      font-family: 'DM Sans', sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .app-shell { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 250px; flex: 0 0 250px; padding: 27px 18px; border-right: 1px solid var(--line);
+      background: rgba(10, 16, 15, .78); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh;
+    }
+    .brand { display:flex; align-items:center; gap:11px; padding: 0 12px 35px; }
+    .brand-mark { width:39px; height:39px; display:grid; place-items:center; color:#14200f; background:var(--green); border-radius:12px; box-shadow:0 7px 24px rgba(183,243,107,.18); }
+    .brand-mark svg { width:23px; height:23px; }
+    .brand-name { font:800 20px 'Manrope',sans-serif; letter-spacing:-.8px; }
+    .brand-name span { color:var(--green); }
+    .nav-label { color:#65766e; font-size:10px; font-weight:700; letter-spacing:1.5px; padding: 0 13px 11px; text-transform:uppercase; }
+    .nav { display:grid; gap:6px; }
+    .nav-btn { border:0; background:transparent; color:var(--muted); display:flex; align-items:center; gap:13px; width:100%; padding:12px 13px; border-radius:11px; text-align:left; font-size:13px; font-weight:600; transition:.2s; }
+    .nav-btn svg { width:18px; height:18px; opacity:.8; }
+    .nav-btn:hover, .nav-btn.active { background:rgba(183,243,107,.10); color:var(--green); }
+    .sidebar-bottom { margin-top:auto; }
+    .side-note { margin: 0 5px 14px; padding:15px; border:1px solid var(--line); background:linear-gradient(145deg,rgba(183,243,107,.08),rgba(183,243,107,.015)); border-radius:14px; }
+    .side-note .note-icon { color:var(--green); font-size:19px; }
+    .side-note strong { display:block; font:700 12px 'Manrope'; margin:8px 0 5px; }
+    .side-note p { font-size:11px; line-height:1.55; color:var(--muted); margin:0; }
+    .profile { display:flex; align-items:center; gap:10px; padding:13px 8px 0; border-top:1px solid var(--line); }
+    .avatar { width:34px;height:34px;border-radius:50%;background:#293a31;color:var(--green);display:grid;place-items:center;font-weight:800;font-size:12px; }
+    .profile strong { display:block;font-size:12px; }
+    .profile small { color:var(--muted);font-size:10px; }
+    .main { flex:1; min-width:0; padding:35px clamp(20px,4vw,58px) 50px; max-width:1600px; margin:0 auto; width:100%; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:31px; }
+    .eyebrow { display:flex; align-items:center; gap:8px; color:var(--green); font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; }
+    .live-dot { width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green); }
+    h1 { font:800 clamp(25px,3vw,34px) 'Manrope',sans-serif; letter-spacing:-1.25px; margin:9px 0 5px; }
+    .subheading { color:var(--muted); font-size:13px; margin:0; }
+    .top-actions { display:flex; align-items:center; gap:10px; }
+    .icon-btn { height:41px;width:41px; border:1px solid var(--line); color:var(--muted); background:var(--panel); border-radius:12px; display:grid;place-items:center; }
+    .icon-btn svg { width:17px;height:17px; }
+    .primary-btn { border:0; display:inline-flex; align-items:center; justify-content:center; gap:9px; background:var(--green); color:#14200f; font-weight:800; font-size:12px; padding:12px 17px; border-radius:11px; transition:.2s; box-shadow:0 8px 25px rgba(183,243,107,.12); }
+    .primary-btn:hover { background:#c8ff82; transform:translateY(-1px); }
+    .primary-btn svg { width:16px;height:16px; }
+    .stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:15px; margin-bottom:26px; }
+    .stat-card { background:linear-gradient(145deg,rgba(22,33,30,.97),rgba(17,26,24,.97)); border:1px solid var(--line); border-radius:var(--radius); padding:19px 20px; min-height:119px; position:relative; overflow:hidden; }
+    .stat-card:after { content:"";position:absolute;width:100px;height:100px;border-radius:50%;background:rgba(183,243,107,.045);right:-32px;top:-38px; }
+    .stat-top { display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:11px;font-weight:600; }
+    .stat-icon { width:29px;height:29px;border-radius:9px;display:grid;place-items:center;background:rgba(183,243,107,.10);color:var(--green); }
+    .stat-icon svg { width:15px;height:15px; }
+    .stat-value { font:800 26px 'Manrope',sans-serif; margin-top:12px; letter-spacing:-.7px; }
+    .stat-foot { font-size:10px;color:#718178;margin-top:2px; }
+    .content-grid { display:grid;grid-template-columns:minmax(0,1.55fr) minmax(285px,.85fr);gap:17px;align-items:start; }
+    .panel { background:rgba(17,26,24,.88); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); }
+    .panel-head { display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 21px 15px; }
+    .panel-title { font:700 15px 'Manrope',sans-serif; margin:0; letter-spacing:-.3px; }
+    .panel-desc { color:var(--muted);font-size:11px;margin:5px 0 0; }
+    .text-btn { background:none;border:0;color:var(--green);font-size:11px;font-weight:700;padding:5px; }
+    .upload-area { margin:0 20px 20px; border:1px dashed rgba(183,243,107,.35); background:linear-gradient(145deg,rgba(183,243,107,.055),rgba(183,243,107,.018)); border-radius:15px; min-height:177px; display:flex;align-items:center;justify-content:center;text-align:center;padding:22px;cursor:pointer;transition:.2s;position:relative; }
+    .upload-area:hover,.upload-area.dragover { border-color:var(--green);background:rgba(183,243,107,.09); }
+    .upload-area input { display:none; }
+    .upload-content { max-width:340px; }
+    .upload-icon { width:43px;height:43px;display:grid;place-items:center;margin:0 auto 10px;border-radius:13px;background:rgba(183,243,107,.12);color:var(--green); }
+    .upload-icon svg { width:21px;height:21px; }
+    .upload-area strong { font-size:13px; }
+    .upload-area p { color:var(--muted);font-size:11px;margin:6px 0 11px; }
+    .browse-link { color:var(--green);font-weight:700; }
+    .file-hint { font-size:9px!important;color:#63746c!important; }
+    .selected-file { display:none;align-items:center;gap:15px;width:100%;text-align:left; }
+    .selected-file img { width:75px;height:95px;object-fit:cover;border-radius:9px;background:#202b27; }
+    .selected-file strong { display:block;font-size:13px;overflow-wrap:anywhere; }
+    .selected-file span { display:block;font-size:10px;color:var(--muted);margin-top:5px; }
+    .selected-file .change { color:var(--green);font-size:11px;font-weight:700;margin-top:9px; }
+    .form-grid { padding:0 20px 21px; display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+    .field { min-width:0; }
+    .field.full { grid-column:1/-1; }
+    .field label { display:block;color:#a9b9b0;font-size:10px;font-weight:700;margin:0 0 7px; }
+    .field input,.field select { width:100%;height:41px;border:1px solid var(--line);outline:none;background:#0e1714;color:var(--text);border-radius:9px;padding:0 11px;font-size:11px;transition:.2s; }
+    .field input:focus,.field select:focus { border-color:rgba(183,243,107,.6);box-shadow:0 0 0 3px rgba(183,243,107,.07); }
+    .field input::placeholder { color:#607169; }
+    .field select option { background:#111a18; }
+    .form-footer { grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:4px; }
+    .form-message { color:var(--muted);font-size:10px;line-height:1.4; }
+    .form-footer .primary-btn { min-width:140px; }
+    .collection-panel { margin-top:17px; }
+    .collection-tools { display:flex;align-items:center;gap:8px; }
+    .search-wrap { position:relative; }
+    .search-wrap svg { position:absolute;left:10px;top:10px;width:14px;height:14px;color:#718178; }
+    .search-wrap input { width:155px;height:34px;background:#0e1714;border:1px solid var(--line);border-radius:9px;color:var(--text);font-size:10px;padding:0 9px 0 30px;outline:none; }
+    .search-wrap input:focus { border-color:rgba(183,243,107,.5); }
+    .sort-select { height:34px;background:#0e1714;border:1px solid var(--line);border-radius:9px;color:var(--muted);font-size:10px;padding:0 8px;outline:none;max-width:125px; }
+    .collection-list { padding:0 20px 18px; }
+    .empty-state { text-align:center;padding:28px 12px 31px;border-top:1px solid var(--line); }
+    .empty-state .empty-icon { width:48px;height:48px;display:grid;place-items:center;margin:0 auto 11px;border-radius:14px;background:var(--panel-3);color:#82958b; }
+    .empty-state svg { width:23px;height:23px; }
+    .empty-state strong { display:block;font-size:12px; }
+    .empty-state p { max-width:270px;margin:6px auto 0;color:var(--muted);font-size:10px;line-height:1.5; }
+    .card-row { display:grid;grid-template-columns:52px minmax(0,1fr) auto auto;align-items:center;gap:13px;padding:12px 0;border-top:1px solid var(--line); }
+    .thumb { width:52px;height:65px;object-fit:cover;border-radius:7px;background:#26342e;border:1px solid rgba(255,255,255,.06); }
+    .thumb-placeholder { display:grid;place-items:center;color:#83958a; }
+    .thumb-placeholder svg { width:20px;height:20px; }
+    .card-info { min-width:0; }
+    .card-info strong { display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .card-info span { display:block;color:var(--muted);font-size:10px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .value-cell { text-align:right;white-space:nowrap; }
+    .value-cell strong { display:block;font:700 12px 'Manrope'; }
+    .value-cell span { color:#718178;font-size:9px; }
+    .row-actions { display:flex;gap:5px; }
+    .mini-btn { width:29px;height:29px;display:grid;place-items:center;border:1px solid var(--line);border-radius:8px;background:#15201c;color:#9bad9f; }
+    .mini-btn:hover { color:var(--green);border-color:rgba(183,243,107,.35); }
+    .mini-btn.delete:hover { color:var(--red);border-color:rgba(255,119,119,.35); }
+    .mini-btn svg { width:13px;height:13px; }
+    .right-column { display:grid;gap:17px; }
+    .value-panel { padding:20px;min-height:189px;position:relative;overflow:hidden;background:linear-gradient(135deg,#1b2b22,#121d19 72%); }
+    .value-panel:after { content:"€";position:absolute;right:10px;bottom:-48px;font:800 180px 'Manrope';color:rgba(183,243,107,.045);pointer-events:none; }
+    .value-panel .panel-title { position:relative;z-index:1; }
+    .value-number { font:800 32px 'Manrope';letter-spacing:-1px;margin:22px 0 4px;color:var(--green);position:relative;z-index:1; }
+    .value-caption { color:#9aada2;font-size:10px;position:relative;z-index:1; }
+    .value-disclaimer { display:flex;gap:7px;align-items:flex-start;margin-top:18px;padding-top:13px;border-top:1px solid rgba(255,255,255,.08);color:#899a90;font-size:9px;line-height:1.5;position:relative;z-index:1; }
+    .value-disclaimer svg { width:13px;height:13px;flex-shrink:0;color:var(--gold); }
+    .insight-panel { padding:19px 20px; }
+    .insight-head { display:flex;align-items:center;justify-content:space-between; }
+    .coming-tag { padding:5px 8px;background:rgba(244,201,107,.1);color:var(--gold);font-size:8px;font-weight:800;letter-spacing:.7px;border-radius:6px;text-transform:uppercase; }
+    .feature-row { display:flex;gap:11px;align-items:flex-start;margin-top:17px; }
+    .feature-icon { width:31px;height:31px;flex-shrink:0;display:grid;place-items:center;background:#202e29;color:var(--green);border-radius:9px; }
+    .feature-icon svg { width:15px;height:15px; }
+    .feature-row strong { display:block;font-size:11px; }
+    .feature-row p { margin:4px 0 0;color:var(--muted);font-size:9px;line-height:1.5; }
+    .footer-note { text-align:center;color:#53635b;font-size:9px;margin-top:28px; }
+    .toast { position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#d4ff9f;color:#14200f;padding:11px 16px;border-radius:10px;font-size:11px;font-weight:700;box-shadow:0 10px 35px rgba(0,0,0,.3);transition:.25s;z-index:20; }
+    .toast.show { opacity:1;transform:translate(-50%,0); }
+    .modal-backdrop { position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;place-items:center;padding:20px;z-index:30; }
+    .modal-backdrop.open { display:grid; }
+    .modal { width:min(430px,100%);background:#14201b;border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow); }
+    .modal h2 { font:700 17px 'Manrope';margin:0 0 7px; }
+    .modal p { color:var(--muted);font-size:11px;line-height:1.6;margin:0 0 17px; }
+    .modal-actions { display:flex;justify-content:flex-end;gap:8px; }
+    .secondary-btn { border:1px solid var(--line);background:#1a2822;color:var(--text);font-size:11px;font-weight:700;padding:10px 13px;border-radius:9px; }
+    .mobile-menu { display:none; }
+    @media(max-width:1100px) { .content-grid{grid-template-columns:minmax(0,1.35fr) minmax(250px,.8fr)} .sidebar{width:220px;flex-basis:220px} }
+    @media(max-width:850px) { .sidebar{width:67px;flex-basis:67px;padding:22px 9px}.brand{padding:0 4px 32px;justify-content:center}.brand-name,.nav-label,.nav-btn span,.side-note,.profile div:last-child{display:none}.nav-btn{justify-content:center;padding:12px}.profile{justify-content:center;padding:13px 0 0}.main{padding:27px 21px 40px}.content-grid{grid-template-columns:1fr}.right-column{grid-template-columns:1fr 1fr}.stats{gap:10px}.stat-card{padding:16px}.stat-value{font-size:23px} }
+    @media(max-width:600px) { .main{padding:22px 14px 35px}.topbar{align-items:flex-start}.top-actions .icon-btn{display:none}.top-actions .primary-btn{padding:11px 12px;font-size:10px}.top-actions .primary-btn svg{display:none}.stats{grid-template-columns:1fr 1fr}.stat-card:last-child{grid-column:1/-1;min-height:100px}.content-grid{gap:13px}.right-column{grid-template-columns:1fr}.panel-head{padding:17px 15px 13px}.upload-area{margin:0 14px 16px;padding:18px 12px}.form-grid{padding:0 14px 16px;gap:10px}.collection-list{padding:0 14px 14px}.collection-tools{gap:5px}.search-wrap input{width:112px}.sort-select{max-width:105px}.card-row{grid-template-columns:45px minmax(0,1fr) auto;gap:9px}.thumb{width:45px;height:58px}.row-actions{grid-column:2/-1;justify-content:flex-end;margin-top:-5px}.value-cell{grid-column:3;grid-row:1}.card-info{grid-column:2;grid-row:1}.form-footer{align-items:flex-start;flex-direction:column}.form-footer .primary-btn{width:100%}.value-number{font-size:30px} }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m8.5 10 3.5-2 3.5 2v4l-3.5 2-3.5-2v-4Z"/></svg></div>
+      <div class="brand-name">CARD<span>VAULT</span></div>
+    </div>
+    <div class="nav-label">Workspace</div>
+    <nav class="nav">
+      <button class="nav-btn active" data-target="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="8" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="15" width="7" height="6" rx="1.5"/></svg><span>Πίνακας ελέγχου</span></button>
+      <button class="nav-btn" data-target="collection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg><span>Η συλλογή μου</span></button>
+      <button class="nav-btn" id="exportBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M4 17v3h16v-3"/></svg><span>Εξαγωγή συλλογής</span></button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="side-note"><div class="note-icon">✦</div><strong>Η συλλογή σου, οργανωμένη.</strong><p>Πρόσθεσε τις κάρτες σου και κράτησε όλες τις πληροφορίες σε ένα μέρος.</p></div>
+      <div class="profile"><div class="avatar">CV</div><div><strong>CardVault User</strong><small>Personal collection</small></div></div>
+    </div>
+  </aside>
+
+  <main class="main" id="dashboard">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow"><span class="live-dot"></span> FOOTBALL CARD MANAGER</div>
+        <h1>Το δικό σου CardVault.</h1>
+        <p class="subheading">Οργάνωσε, παρακολούθησε και απόλαυσε τη συλλογή σου.</p>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" title="Εξαγωγή συλλογής" id="exportIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m-4-4 4 4 4-4M4 17v3h16v-3"/></svg></button>
+        <button class="primary-btn" id="jumpToUpload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Προσθήκη κάρτας</button>
+      </div>
+    </header>
+
+    <section class="stats" aria-label="Στατιστικά συλλογής">
+      <div class="stat-card"><div class="stat-top"><span>ΣΥΝΟΛΟ ΚΑΡΤΩΝ</span><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 11h6"/></svg></span></div><div class="stat-value" id="totalCards">0</div><div class="stat-foot">Κάρτες στη συλλογή σου</div></div>
+      <div class="stat-card"><div class="stat-top"><span>ΣΥΝΟΛΙΚΗ ΕΚΤΙΜΗΣΗ</span><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20m5-15.5C17 4.6 14.9 4 12 4S7 5.1 7 7s1.8 2.7 5 3.2 5 1.4 5 3.5-2 3.3-5 3.3-5-.9-5-2.8"/></svg></span></div><div class="stat-value" id="totalValue">€0.00</div><div class="stat-foot">Με βάση τις τιμές που καταχώρισες</div></div>
+      <div class="stat-card"><div class="stat-top"><span>ΜΕΣΗ ΑΞΙΑ / ΚΑΡΤΑ</span><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m4 16 5-5 4 3 7-8"/><path d="M14 6h6v6"/></svg></span></div><div class="stat-value" id="averageValue">€0.00</div><div class="stat-foot">Για κάρτες με καταχωρισμένη αξία</div></div>
+    </section>
+
+    <section class="content-grid">
+      <div class="left-column">
+        <section class="panel" id="uploadPanel">
+          <div class="panel-head"><div><h2 class="panel-title">Πρόσθεσε νέα κάρτα</h2><p class="panel-desc">Ανέβασε μια φωτογραφία και συμπλήρωσε τα στοιχεία της.</p></div><span class="coming-tag">CARD ENTRY</span></div>
+          <label class="upload-area" id="dropZone" for="imageInput">
+            <input type="file" id="imageInput" accept="image/png,image/jpeg,image/webp" />
+            <div class="upload-content" id="uploadPrompt">
+              <div class="upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V4m-4 4 4-4 4 4"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg></div>
+              <strong>Σύρε τη φωτογραφία της κάρτας εδώ</strong>
+              <p>ή <span class="browse-link">επέλεξε αρχείο</span> από τη συσκευή σου</p>
+              <p class="file-hint">JPG, PNG ή WEBP · Η εικόνα αποθηκεύεται τοπικά στον browser σου</p>
+            </div>
+            <div class="selected-file" id="selectedFile"><img id="previewImage" alt="Προεπισκόπηση κάρτας"/><div><strong id="fileName">card.jpg</strong><span id="fileSize">Επιλεγμένη εικόνα</span><span class="change">Αλλαγή φωτογραφίας</span></div></div>
+          </label>
+          <form class="form-grid" id="cardForm">
+            <div class="field"><label for="playerName">ΠΑΙΚΤΗΣ *</label><input id="playerName" name="playerName" placeholder="π.χ. Lionel Messi" required maxlength="70" /></div>
+            <div class="field"><label for="teamName">ΟΜΑΔΑ</label><input id="teamName" name="teamName" placeholder="π.χ. Inter Miami" maxlength="70" /></div>
+            <div class="field"><label for="cardYear">ΧΡΟΝΙΑ</label><input id="cardYear" name="cardYear" type="number" min="1900" max="2100" placeholder="π.χ. 2024" /></div>
+            <div class="field"><label for="cardSeries">ΣΕΙΡΑ / ΕΚΔΟΣΗ</label><input id="cardSeries" name="cardSeries" placeholder="π.χ. Panini Prizm" maxlength="80" /></div>
+            <div class="field"><label for="cardCondition">ΚΑΤΑΣΤΑΣΗ</label><select id="cardCondition" name="cardCondition"><option value="Άγνωστη">Δεν γνωρίζω</option><option value="Mint">Mint</option><option value="Near Mint">Near Mint</option><option value="Excellent">Excellent</option><option value="Good">Good</option><option value="Played">Played</option></select></div>
+            <div class="field"><label for="cardValue">ΕΚΤΙΜΩΜΕΝΗ ΑΞΙΑ (€)</label><input id="cardValue" name="cardValue" type="number" min="0" max="100000000" step="0.01" placeholder="π.χ. 12.50" /></div>
+            <div class="field full"><label for="cardNotes">ΣΗΜΕΙΩΣΕΙΣ</label><input id="cardNotes" name="cardNotes" placeholder="π.χ. Υπογεγραμμένη, limited edition..." maxlength="240" /></div>
+            <div class="form-footer"><span class="form-message">* Απαιτείται το όνομα του παίκτη. Η αξία είναι προαιρετική και καταχωρίζεται από εσένα.</span><button class="primary-btn" type="submit" id="saveCardBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.5 10 17l9-10"/></svg> Αποθήκευση κάρτας</button></div>
+          </form>
+        </section>
+
+        <section class="panel collection-panel" id="collection">
+          <div class="panel-head"><div><h2 class="panel-title">Η συλλογή μου</h2><p class="panel-desc">Όλες οι κάρτες που έχεις αποθηκεύσει.</p></div><div class="collection-tools"><div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg><input type="search" id="searchInput" placeholder="Αναζήτηση..." aria-label="Αναζήτηση καρτών"/></div><select class="sort-select" id="sortSelect" aria-label="Ταξινόμηση"><option value="newest">Πιο πρόσφατες</option><option value="oldest">Παλαιότερες</option><option value="high">Μεγαλύτερη αξία</option><option value="low">Μικρότερη αξία</option></select></div></div>
+          <div class="collection-list" id="collectionList"><div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6"/></svg></div><strong>Η συλλογή σου είναι ακόμη άδεια</strong><p>Πρόσθεσε την πρώτη σου ποδοσφαιρική κάρτα για να ξεκινήσεις.</p></div></div>
+        </section>
+      </div>
+
+      <aside class="right-column">
+        <section class="panel value-panel">
+          <h2 class="panel-title">Αξία συλλογής</h2>
+          <div class="value-number" id="heroValue">€0.00</div>
+          <div class="value-caption">Σύνολο καταχωρισμένων εκτιμήσεων</div>
+          <div class="value-disclaimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg><span>Πρόκειται για προσωπικές εκτιμήσεις που έχεις εισαγάγει, όχι για επιβεβαιωμένες τιμές αγοράς.</span></div>
+        </section>
+        <section class="panel insight-panel">
+          <div class="insight-head"><h2 class="panel-title">Έξυπνες λειτουργίες</h2><span class="coming-tag">COMING SOON</span></div>
+          <div class="feature-row"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7V4h3m10 0h3v3M4 17v3h3m10 0h3v-3"/><circle cx="12" cy="12" r="3"/><path d="M7 12h2m6 0h2m-5-5v2m0 6v2"/></svg></div><div><strong>Αναγνώριση κάρτας με AI</strong><p>Αυτόματος εντοπισμός παίκτη, ομάδας, σειράς και έκδοσης από τη φωτογραφία.</p></div></div>
+          <div class="feature-row"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20m5-15.5C17 4.6 14.9 4 12 4S7 5.1 7 7s1.8 2.7 5 3.2 5 1.4 5 3.5-2 3.3-5 3.3-5-.9-5-2.8"/></svg></div><div><strong>Πραγματικές τιμές αγοράς</strong><p>Σύνδεση με αξιόπιστες πηγές πωλήσεων για πιο χρήσιμη εκτίμηση αξίας.</p></div></div>
+          <div class="feature-row"><div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5m0 14h16"/><path d="m7 15 4-4 3 2 5-6"/></svg></div><div><strong>Ιστορικό αξίας</strong><p>Παρακολούθηση της μεταβολής της αξίας των καρτών σου με την πάροδο του χρόνου.</p></div></div>
+        </section>
+      </aside>
+    </section>
+    <div class="footer-note">CARDVAULT · YOUR FOOTBALL CARDS, ONE HOME.</div>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="modal-backdrop" id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="deleteTitle"><div class="modal"><h2 id="deleteTitle">Διαγραφή κάρτας;</h2><p>Η κάρτα θα αφαιρεθεί από τη συλλογή σου σε αυτή τη συσκευή. Η ενέργεια δεν μπορεί να αναιρεθεί.</p><div class="modal-actions"><button class="secondary-btn" id="cancelDelete">Ακύρωση</button><button class="primary-btn" id="confirmDelete" style="background:#ff7777;color:#2a1111;box-shadow:none">Διαγραφή</button></div></div></div>
+<script>
+(() => {
+  'use strict';
+  const STORAGE_KEY = 'cardvault_collection_v1';
+  const $ = (id) => document.getElementById(id);
+  const form = $('cardForm');
+  const imageInput = $('imageInput');
+  const dropZone = $('dropZone');
+  let selectedImage = '';
+  let editingId = null;
+  let pendingDeleteId = null;
+  let cards = loadCards();
+
+  function loadCards() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      console.error('Could not read saved cards:', error);
+      return [];
+    }
+  }
+  function persistCards() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+      return true;
+    } catch (error) {
+      console.error('Could not save cards:', error);
+      showToast('Δεν υπάρχει αρκετός χώρος αποθήκευσης. Δοκίμασε μικρότερη εικόνα.');
+      return false;
+    }
+  }
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+  function money(value) {
+    return new Intl.NumberFormat('el-GR', { style:'currency', currency:'EUR' }).format(Number(value) || 0);
+  }
+  function showToast(message) {
+    const toast = $('toast'); toast.textContent = message; toast.classList.add('show');
+    clearTimeout(showToast.timer); showToast.timer = setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+  function resetForm() {
+    form.reset(); selectedImage = ''; editingId = null;
+    $('uploadPrompt').style.display = 'block'; $('selectedFile').style.display = 'none';
+    $('saveCardBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.5 10 17l9-10"/></svg> Αποθήκευση κάρτας';
+    imageInput.value = '';
+  }
+  function compressImage(file) {
+    return new Promise((resolve, reject) => {
+      if (!file.type.startsWith('image/')) return reject(new Error('Το αρχείο δεν είναι εικόνα.'));
+      if (file.size > 15 * 1024 * 1024) return reject(new Error('Η εικόνα πρέπει να είναι μικρότερη από 15 MB.'));
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Δεν ήταν δυνατή η ανάγνωση της εικόνας.'));
+      reader.onload = () => {
+        const image = new Image();
+        image.onerror = () => reject(new Error('Η εικόνα δεν μπορεί να ανοιχτεί.'));
+        image.onload = () => {
+          const maxSide = 1000, scale = Math.min(1, maxSide / Math.max(image.width, image.height));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.round(image.width * scale); canvas.height = Math.round(image.height * scale);
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return reject(new Error('Δεν υποστηρίζεται η επεξεργασία εικόνας.'));
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', .78));
+        };
+        image.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  async function handleFile(file) {
+    if (!file) return;
+    try {
+      selectedImage = await compressImage(file);
+      $('previewImage').src = selectedImage;
+      $('fileName').textContent = file.name;
+      $('fileSize').textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB · Έτοιμη για αποθήκευση`;
+      $('uploadPrompt').style.display = 'none'; $('selectedFile').style.display = 'flex';
+      showToast('Η φωτογραφία προστέθηκε. Συμπλήρωσε τα στοιχεία της κάρτας.');
+    } catch (error) { showToast(error.message || 'Κάτι πήγε στραβά με την εικόνα.'); }
+  }
+  imageInput.addEventListener('change', e => handleFile(e.target.files && e.target.files[0]));
+  ['dragenter','dragover'].forEach(name => dropZone.addEventListener(name, e => { e.preventDefault(); dropZone.classList.add('dragover'); }));
+  ['dragleave','drop'].forEach(name => dropZone.addEventListener(name, e => { e.preventDefault(); dropZone.classList.remove('dragover'); }));
+  dropZone.addEventListener('drop', e => { const file = e.dataTransfer.files && e.dataTransfer.files[0]; if (file) handleFile(file); });
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const player = $('playerName').value.trim();
+    if (!player) { $('playerName').focus(); return; }
+    const rawValue = $('cardValue').value.trim();
+    const value = rawValue === '' ? null : Number(rawValue);
+    if (value !== null && (!Number.isFinite(value) || value < 0)) { showToast('Έλεγξε την εκτιμώμενη αξία.'); return; }
+    const existing = editingId ? cards.find(card => card.id === editingId) : null;
+    const card = {
+      id: existing ? existing.id : (crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random())),
+      player, team: $('teamName').value.trim(), year: $('cardYear').value.trim(),
+      series: $('cardSeries').value.trim(), condition: $('cardCondition').value,
+      value, notes: $('cardNotes').value.trim(), image: selectedImage || (existing ? existing.image : ''),
+      createdAt: existing ? existing.createdAt : Date.now(), updatedAt: Date.now()
+    };
+    if (existing) cards = cards.map(item => item.id === editingId ? card : item); else cards.unshift(card);
+    if (persistCards()) { render(); resetForm(); showToast(existing ? 'Η κάρτα ενημερώθηκε!' : 'Η κάρτα αποθηκεύτηκε στη συλλογή σου!'); }
+  });
+
+  function renderStats() {
+    const priced = cards.filter(card => card.value !== null && card.value !== '' && Number.isFinite(Number(card.value)));
+    const total = priced.reduce((sum, card) => sum + Number(card.value), 0);
+    const average = priced.length ? total / priced.length : 0;
+    $('totalCards').textContent = cards.length.toLocaleString('el-GR');
+    $('totalValue').textContent = money(total); $('heroValue').textContent = money(total);
+    $('averageValue').textContent = money(average);
+  }
+  function renderCollection() {
+    const query = $('searchInput').value.trim().toLocaleLowerCase('el-GR');
+    const sort = $('sortSelect').value;
+    let visible = cards.filter(card => [card.player, card.team, card.series, card.year].join(' ').toLocaleLowerCase('el-GR').includes(query));
+    visible.sort((a,b) => sort === 'oldest' ? a.createdAt-b.createdAt : sort === 'high' ? (Number(b.value)||0)-(Number(a.value)||0) : sort === 'low' ? (Number(a.value)||0)-(Number(b.value)||0) : b.createdAt-a.createdAt);
+    const list = $('collectionList');
+    if (!visible.length) {
+      const isSearching = Boolean(query);
+      list.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">${isSearching ? '<circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/>' : '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6"/>'}</svg></div><strong>${isSearching ? 'Δεν βρέθηκαν κάρτες' : 'Η συλλογή σου είναι ακόμη άδεια'}</strong><p>${isSearching ? 'Δοκίμασε διαφορετικό όνομα παίκτη, ομάδα ή σειρά.' : 'Πρόσθεσε την πρώτη σου ποδοσφαιρική κάρτα για να ξεκινήσεις.'}</p></div>`;
+      return;
+    }
+    list.innerHTML = visible.map(card => `
+      <article class="card-row">
+        ${card.image ? `<img class="thumb" src="${card.image}" alt="Κάρτα ${escapeHtml(card.player)}" />` : `<div class="thumb thumb-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6"/></svg></div>`}
+        <div class="card-info"><strong>${escapeHtml(card.player)}</strong><span>${escapeHtml([card.team, card.year, card.series].filter(Boolean).join(' · ') || 'Χωρίς επιπλέον στοιχεία')}</span></div>
+        <div class="value-cell"><strong>${card.value === null || card.value === '' ? '—' : money(card.value)}</strong><span>${card.value === null || card.value === '' ? 'Χωρίς εκτίμηση' : 'Προσωπική εκτίμηση'}</span></div>
+        <div class="row-actions"><button class="mini-btn" title="Επεξεργασία" data-edit="${escapeHtml(card.id)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m14 5 5 5M4 20l4.2-.8L19 8.4a2.1 2.1 0 0 0-3-3L5.2 16.2 4 20Z"/></svg></button><button class="mini-btn delete" title="Διαγραφή" data-delete="${escapeHtml(card.id)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3"/></svg></button></div>
+      </article>`).join('');
+  }
+  function render() { renderStats(); renderCollection(); }
+  $('searchInput').addEventListener('input', renderCollection);
+  $('sortSelect').addEventListener('change', renderCollection);
+  $('collectionList').addEventListener('click', e => {
+    const editButton = e.target.closest('[data-edit]');
+    const deleteButton = e.target.closest('[data-delete]');
+    if (editButton) editCard(editButton.dataset.edit);
+    if (deleteButton) { pendingDeleteId = deleteButton.dataset.delete; $('deleteModal').classList.add('open'); }
+  });
+  function editCard(id) {
+    const card = cards.find(item => item.id === id); if (!card) return;
+    editingId = id; selectedImage = card.image || '';
+    $('playerName').value = card.player; $('teamName').value = card.team || ''; $('cardYear').value = card.year || '';
+    $('cardSeries').value = card.series || ''; $('cardCondition').value = card.condition || 'Άγνωστη';
+    $('cardValue').value = card.value ?? ''; $('cardNotes').value = card.notes || '';
+    if (selectedImage) { $('previewImage').src = selectedImage; $('fileName').textContent = 'Αποθηκευμένη φωτογραφία'; $('fileSize').textContent = 'Η φωτογραφία της κάρτας'; $('uploadPrompt').style.display = 'none'; $('selectedFile').style.display = 'flex'; }
+    $('saveCardBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg> Ενημέρωση κάρτας';
+    $('uploadPanel').scrollIntoView({behavior:'smooth',block:'start'}); $('playerName').focus({preventScroll:true});
+  }
+  $('cancelDelete').addEventListener('click', () => { pendingDeleteId = null; $('deleteModal').classList.remove('open'); });
+  $('deleteModal').addEventListener('click', e => { if (e.target === $('deleteModal')) $('cancelDelete').click(); });
+  $('confirmDelete').addEventListener('click', () => {
+    if (!pendingDeleteId) return;
+    cards = cards.filter(card => card.id !== pendingDeleteId);
+    if (persistCards()) { render(); showToast('Η κάρτα διαγράφηκε.'); }
+    pendingDeleteId = null; $('deleteModal').classList.remove('open');
+    if (editingId && !cards.some(card => card.id === editingId)) resetForm();
+  });
+  function exportCollection() {
+    const data = { app:'CardVault', exportedAt:new Date().toISOString(), cards };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob); const a = document.createElement('a');
+    a.href = url; a.download = `cardvault-collection-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    showToast('Η εξαγωγή της συλλογής ξεκίνησε.');
+  }
+  $('exportBtn').addEventListener('click', exportCollection); $('exportIcon').addEventListener('click', exportCollection);
+  $('jumpToUpload').addEventListener('click', () => $('uploadPanel').scrollIntoView({behavior:'smooth',block:'start'}));
+  document.querySelectorAll('.nav-btn[data-target]').forEach(button => button.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(item => item.classList.remove('active'));
+    button.classList.add('active'); $(button.dataset.target).scrollIntoView({behavior:'smooth',block:'start'});
+  }));
+  render();
+})();
+</script>
+</body>
+</html>
